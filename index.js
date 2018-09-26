@@ -1,6 +1,7 @@
 const express = require('express')
 const fs = require('fs')
 const {downloadUrl} = require('./crawler');
+const {extractLinks} = require('./parser');
 
 const server = express();
 
@@ -9,7 +10,7 @@ server.get('/crawl', (req, res) => {
   downloadUrl(url, (err, response) => {
     if (err) console.log(err)
     else {
-      console.log(response); 
+      console.log(extractLinks(response, url));
     }
     res.status(200).send(url)
   });
