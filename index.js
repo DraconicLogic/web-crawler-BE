@@ -1,48 +1,76 @@
 const express = require('express');
 const fs = require('fs')
-const {downloadUrl, checkIfUrlValid} = require('./crawler');
-const {extractHrefs} = require('./parser');
-const {getFilePath} = require('./utils');
+const {
+  downloadUrl,
+  checkIfUrlValid
+} = require('./crawler');
+const {
+  extractHrefs
+} = require('./parser');
+const {
+  getFilePath
+} = require('./utils');
 
 const server = express();
 
-const doStuff = (cb) => {
+const doStuff = (url, cb) => {
   const data = [];
   downloadUrl(url, (err, response) => {
-    if (err) data.push({url, status:'error'})
+    if (err) data.push({
+      url,
+      status: 'error'
+    })
     else {
       const hrefs = extractHrefs(response, url);
       hrefs.forEach(href => {
-        checkIfUrlValid(url, (err, res) => {
-          if (err) results.push({url, status:'error'})
-          else{
-            if (res.statusCode === 404 || res.statusCode === 500){
-              data.push({url, status:'error'});
-            }else{
-              data.push({url, status:'success'});
+        checkIfUrlValid(href, (err, res) => {
+          if (err) results.push({
+            url: href,
+            status: 'error'
+          })
+          else {
+            if (res.statusCode === 404 || res.statusCode === 500) {
+              data.push({
+                url: href,
+                status: 'error'
+              });
+            } else {
+              data.push({
+                url: href,
+                status: 'success'
+              });
             }
           }
-          if (data.length === hrefs.length){
+          if (data.length === hrefs.length) {
+
             cb(null, data)
           }
         })
       })
     }
-  });  
+  });
 }
 
 server.get('/crawl', (req, res) => {
-  const { url } = req.query
+  const {
+    url
+  } = req.query
   let data = [];
-  if (fs.existsSync(getFilePath(url))){
+  if (fs.existsSync(getFilePath(url))) {
     data = JSON.parse(fs.readFileSync(getFilePath(url)));
-  }else{
+    res.status(200).send(data);
+  } else {
+    doStuff(url, (err, data) => {
+
+      fs.writeFileSync(getFilePath(url), JSON.stringify(data))
+      res.status(200).send(data);
+
+    })
   }
 
-  res.status(200).send(data);
 
   //Do something to load a cached version
-//  if (fs.existsSync())
+  //  if (fs.existsSync())
 
   // downloadUrl(url, (err, response) => {
   //   if (err) console.log({url, status:'error'})
