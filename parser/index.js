@@ -7,7 +7,7 @@ function getProtocolAndHostName(url){
     return parsedUrl.protocol + '//' + parsedUrl.hostname;    
 }
 
-function extractLinks(doc, url) {
+function extractHrefs(doc, url) {
     const dom = new JSDOM(doc);
     const elements = dom.window.document.querySelectorAll('a');
     const results = [];
@@ -19,4 +19,4 @@ function extractLinks(doc, url) {
     return results;
 }
 
-module.exports = {extractLinks}
+module.exports = {extractHrefs}

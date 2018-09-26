@@ -6,6 +6,8 @@ function checkIfUrlValid (address, cb) {
     const options = {method:'HEAD', host: urlToValidate.hostname, port: urlToValidate.port, path: urlToValidate.path }
     const req = http.request(options, (res) => {
         cb(null, res)
+    }).on('error', (err) => {
+        cb({msg:'Error', address}, null)
     });
     req.end();
 };
@@ -19,10 +21,10 @@ function downloadUrl(address, cb){
                 cb(null, rawData);
             });
         }else{
-            cb({msg: 'Not found', status: res.statusCode, url: address}, null);
+            cb({msg: 'Not found', status: res.statusCode, address}, null);
         }
     }).on('error', function(err) {
-        cb({msg:'Error', url:address}, null);
+        cb({msg:'Error', address}, null);
     });
 }
 
